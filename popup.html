@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Short URL</title>
+  <style>
+    body { 
+      width: 350px; 
+      height: 600px;
+      padding: 20px; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      overflow-y: auto;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      min-height: calc(100% - 40px);
+    }
+    
+    h3 {
+      margin: 0 0 20px 0;
+      color: #333;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .section {
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: #4CAF50;
+      margin-right: 8px;
+      border-radius: 2px;
+    }
+    
+    .button { 
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white; 
+      padding: 12px 16px; 
+      margin: 8px 0; 
+      border: none; 
+      border-radius: 8px;
+      cursor: pointer; 
+      width: 100%;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    }
+    
+    .button:hover { 
+      background: linear-gradient(135deg, #45a049, #3d8b40);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+    }
+    
+    .button:active {
+      transform: translateY(0);
+    }
+    
+    .url-input { 
+      width: 100%; 
+      padding: 12px 16px; 
+      margin: 8px 0; 
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    
+    .url-input:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+    
+    .result { 
+      background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+      padding: 16px; 
+      margin: 12px 0; 
+      border-radius: 8px;
+      word-break: break-all;
+      border: 1px solid #c8e6c9;
+      font-size: 13px;
+    }
+    
+    .result a {
+      color: #2e7d32;
+      font-weight: 500;
+    }
+    
+    .history-list { 
+      list-style: none; 
+      padding: 0; 
+      margin: 0;
+    }
+    
+    .history-item { 
+      margin-bottom: 12px; 
+      font-size: 12px;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .history-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #6c757d;
+    }
+    
+    .history-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 13px;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .history-links {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    
+    .history-item a { 
+      color: #007bff; 
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+    
+    .history-item a:hover { 
+      text-decoration: underline; 
+    }
+    
+    .copy-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+    }
+    
+    .copy-btn:hover {
+      background: #0056b3;
+    }
+    
+    .copy-btn.copied {
+      background: #28a745;
+    }
+    
+    .options-btn {
+      background: linear-gradient(135deg, #6c757d, #5a6268);
+      margin-top: 15px;
+    }
+    
+    .options-btn:hover {
+      background: linear-gradient(135deg, #5a6268, #495057);
+    }
+    
+    .no-history {
+      text-align: center;
+      color: #6c757d;
+      font-style: italic;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3>🔗 Short URL Generator</h3>
+    
+    <div class="section">
+      <div class="section-title">Quick Actions</div>
+      <button id="shorten-current-btn" class="button">📄 Shorten Current Page URL</button>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Custom URL</div>
+      <input type="text" id="custom-url" class="url-input" placeholder="Enter any URL to shorten...">
+      <button id="shorten-custom-btn" class="button">🔗 Shorten Custom URL</button>
+    </div>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <div class="section">
+      <div class="section-title">📚 Recent URLs</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-size: 12px; color: #6c757d;">Last 10 shortened URLs</span>
+        <div style="display: flex; gap: 8px;">
+          <button id="view-all-btn" style="background: #007bff; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">📋 View All</button>
+          <button id="clear-history-btn" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">🗑️ Clear</button>
+        </div>
+      </div>
+      <ul id="history-list" class="history-list"></ul>
+    </div>
+    
+    <button id="options-btn" class="button options-btn">⚙️ Settings</button>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
