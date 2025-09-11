@@ -187,6 +187,96 @@
       background: #17a2b8;
     }
     
+    .action-buttons {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    
+    .action-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .action-btn.edit {
+      background: #ffc107;
+      color: #212529;
+    }
+    
+    .action-btn.edit:hover {
+      background: #e0a800;
+    }
+    
+    .action-btn.delete {
+      background: #dc3545;
+    }
+    
+    .action-btn.delete:hover {
+      background: #c82333;
+    }
+    
+    .edit-form {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .edit-form.show {
+      display: block;
+    }
+    
+    .edit-input {
+      width: 100%;
+      padding: 8px 12px;
+      margin: 5px 0;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    
+    .edit-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .edit-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .edit-btn.save {
+      background: #28a745;
+      color: white;
+    }
+    
+    .edit-btn.save:hover {
+      background: #218838;
+    }
+    
+    .edit-btn.cancel {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .edit-btn.cancel:hover {
+      background: #5a6268;
+    }
+    
     .empty-state {
       text-align: center;
       padding: 60px 30px;
@@ -230,6 +320,7 @@
     <div class="header">
       <h1>🔗 URL History</h1>
       <p>Complete history of all your shortened URLs</p>
+      <p style="font-size: 12px; opacity: 0.8; margin: 5px 0 0 0;">💡 Press F5 or click "🔄 Refresh All" to reload new URLs</p>
     </div>
     
     <div class="controls">
@@ -241,6 +332,7 @@
       <input type="text" id="search-box" class="search-box" placeholder="Search URLs or titles...">
       
       <div class="actions">
+        <button id="refresh-stats-btn" class="btn btn-primary">🔄 Refresh All</button>
         <button id="export-btn" class="btn btn-primary">📥 Export</button>
         <button id="clear-all-btn" class="btn btn-danger">🗑️ Clear All</button>
       </div>
@@ -257,6 +349,7 @@
     </div>
   </div>
   
+  <script src="utils.js"></script>
   <script src="history.js"></script>
 </body>
 </html>

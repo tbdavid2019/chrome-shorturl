@@ -21,7 +21,7 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.storage.sync.set({ baseUrl: 'https://aiurl.tw/api/link/create' });
     }
     if (!result.token) {
-      chrome.storage.sync.set({ token: 'ToNf.360' }); // Updated default token for aiurl.tw
+      chrome.storage.sync.set({ token: '' }); // Updated default token for aiurl.tw
     }
   });
 });
@@ -35,14 +35,26 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const apiUrl = baseUrl;
     const auth = `Bearer ${token}`;
 
-    const tryShorten = async (url, apiUrl, auth) => {
+    const tryShorten = async (url, apiUrl, auth, comment, slug = null, expiration = null) => {
+      // Prepare request body
+      const requestBody = { url };
+      if (comment) {
+        requestBody.comment = comment;
+      }
+      if (slug) {
+        requestBody.slug = slug;
+      }
+      if (expiration) {
+        requestBody.expiration = expiration;
+      }
+      
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'authorization': auth,
           'content-type': 'application/json'
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify(requestBody)
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -57,13 +69,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     };
 
     try {
-      let data = await tryShorten(url, apiUrl, auth);
+      const comment = `Right-click: ${tab.title}`;
+      let data = await tryShorten(url, apiUrl, auth, comment);
       let shortLink = data.shortLink;
 
       // If backup URL is set and primary failed, try backup
       if (!shortLink && backupUrl && backupToken) {
         try {
-          data = await tryShorten(url, backupUrl, `Bearer ${backupToken}`);
+          data = await tryShorten(url, backupUrl, `Bearer ${backupToken}`, comment);
           shortLink = data.shortLink;
         } catch (backupError) {
           console.error('Backup also failed:', backupError);
@@ -92,6 +105,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           original: url, 
           short: shortLink, 
           title: tab.title || 'Untitled Page',
+          comment: comment || '',
+          slug: '',
+          expiration: '',
           createdAt: Date.now() 
         });
         if (history.length > 50) history.pop(); // Keep last 50 items

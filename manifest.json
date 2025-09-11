@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Short URL Extension 333 ",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Shorten URLs using cf worker API - DAVID888.com",
   "permissions": [
     "contextMenus",
@@ -9,11 +9,15 @@
     "activeTab",
     "clipboardWrite",
     "notifications",
-    "scripting"
+    "scripting",
+    "permissions"
   ],
   "host_permissions": [
     "https://aiurl.tw/*",
     "https://glsoft.ai/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background.js"

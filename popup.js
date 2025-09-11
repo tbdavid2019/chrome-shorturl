@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const shortenCurrentBtn = document.getElementById('shorten-current-btn');
   const shortenCustomBtn = document.getElementById('shorten-custom-btn');
   const customUrlInput = document.getElementById('custom-url');
+  const customCommentInput = document.getElementById('custom-comment');
+  const customSlugInput = document.getElementById('custom-slug');
+  const expirationSelect = document.getElementById('expiration-select');
   const resultDiv = document.getElementById('result');
   const clearHistoryBtn = document.getElementById('clear-history-btn');
   const viewAllBtn = document.getElementById('view-all-btn');
@@ -25,10 +28,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load history
   const loadHistory = async () => {
-    const { history } = await chrome.storage.sync.get('history');
+    const { history, baseUrl, token } = await chrome.storage.sync.get(['history', 'baseUrl', 'token']);
     historyList.innerHTML = '';
     if (history && history.length > 0) {
-      history.slice(0, 10).forEach(item => {
+      const recentHistory = history.slice(0, 10);
+      
+      // Load stats for each URL in parallel
+      const historyWithStats = await Promise.all(
+        recentHistory.map(async (item) => {
+          const stats = await getUrlStats(item.short, baseUrl, token);
+          return { ...item, stats };
+        })
+      );
+      
+      historyWithStats.forEach(item => {
         const li = document.createElement('li');
         li.className = 'history-item';
         
@@ -43,6 +56,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         title.className = 'history-title';
         title.textContent = item.title || 'Untitled Page';
         title.title = item.title || item.original;
+        
+        // Add stats display
+        const stats = document.createElement('div');
+        stats.className = 'history-stats';
+        stats.style.fontSize = '11px';
+        stats.style.color = '#28a745';
+        stats.style.marginBottom = '6px';
+        stats.innerHTML = `📊 ${item.stats.visits} visits • ${item.stats.visitors} visitors • ${item.stats.referers} referers`;
         
         const links = document.createElement('div');
         links.className = 'history-links';
@@ -69,9 +90,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         links.appendChild(shortLink);
         links.appendChild(copyBtn);
         
+        // Add mini delete button
+        const historyActions = document.createElement('div');
+        historyActions.className = 'history-actions';
+        
+        const miniEditBtn = document.createElement('button');
+        miniEditBtn.className = 'mini-btn';
+        miniEditBtn.textContent = '✏️';
+        miniEditBtn.title = 'Edit this URL';
+        miniEditBtn.onclick = (e) => {
+          e.preventDefault();
+          // Open history page with edit mode for this item
+          const historyUrl = chrome.runtime.getURL('history.html') + `?edit=${encodeURIComponent(item.short)}`;
+          chrome.tabs.create({ url: historyUrl });
+        };
+        
+        const miniDeleteBtn = document.createElement('button');
+        miniDeleteBtn.className = 'mini-btn delete';
+        miniDeleteBtn.textContent = '🗑️';
+        miniDeleteBtn.title = 'Delete this URL';
+        miniDeleteBtn.onclick = async (e) => {
+          e.preventDefault();
+          if (confirm(`Delete this URL?\n${item.short}`)) {
+            await deleteUrlFromPopup(item);
+          }
+        };
+        
+        historyActions.appendChild(miniEditBtn);
+        historyActions.appendChild(miniDeleteBtn);
+        
         content.appendChild(header);
         content.appendChild(title);
+        content.appendChild(stats);
         content.appendChild(links);
+        content.appendChild(historyActions);
         
         li.appendChild(content);
         historyList.appendChild(li);
@@ -87,10 +139,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadHistory();
 
   // Shorten URL function
-  const shortenUrl = async (url, title = null) => {
+  const shortenUrl = async (url, title = null, comment = null, slug = null, expiration = null) => {
     try {
       // Get settings
       const { baseUrl, token } = await chrome.storage.sync.get(['baseUrl', 'token']);
+      
+      // Prepare request body
+      const requestBody = { url };
+      if (comment) {
+        requestBody.comment = comment;
+      }
+      if (slug) {
+        requestBody.slug = slug;
+      }
+      if (expiration) {
+        requestBody.expiration = expiration;
+      }
       
       const response = await fetch(baseUrl, {
         method: 'POST',
@@ -98,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           'authorization': `Bearer ${token}`,
           'content-type': 'application/json'
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
@@ -113,13 +177,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       const base = baseUrl.replace('/api/link/create', '');
       const shortLink = base + '/' + data.link.slug;
 
-      // Store history with title and timestamp
+      // Store history with title, comment and timestamp
       const result = await chrome.storage.sync.get('history');
       const history = result.history || [];
       history.unshift({ 
         original: url, 
         short: shortLink, 
         title: title || 'Untitled Page',
+        comment: comment || '',
+        slug: slug || '',
+        expiration: expiration || '',
         createdAt: Date.now() 
       });
       if (history.length > 50) history.pop(); // Keep last 50 items
@@ -147,18 +214,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Shorten current page URL
   shortenCurrentBtn.addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    await shortenUrl(tab.url, tab.title);
+    const comment = `Page: ${tab.title}`;
+    await shortenUrl(tab.url, tab.title, comment);
   });
 
   // Shorten custom URL
   shortenCustomBtn.addEventListener('click', async () => {
     const url = customUrlInput.value.trim();
+    const comment = customCommentInput.value.trim();
+    const slug = customSlugInput.value.trim();
+    const expiration = expirationSelect.value;
+    
     if (!url) {
       alert('Please enter a URL');
       return;
     }
-    await shortenUrl(url);
+    
+    await shortenUrl(url, null, comment || 'Custom URL', slug, expiration);
     customUrlInput.value = '';
+    customCommentInput.value = '';
+    customSlugInput.value = '';
+    expirationSelect.value = '';
   });
 
   // Clear history
@@ -178,4 +254,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   optionsBtn.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
   });
+
+  // Delete URL from popup
+  const deleteUrlFromPopup = async (item) => {
+    try {
+      const { baseUrl, token, history } = await chrome.storage.sync.get(['baseUrl', 'token', 'history']);
+      
+      if (!baseUrl || !token) {
+        alert('Please configure API settings first');
+        return;
+      }
+
+      // Extract slug from short URL
+      const urlParts = item.short.split('/');
+      const slug = urlParts[urlParts.length - 1];
+
+      // Prepare delete API URL
+      const deleteApiUrl = baseUrl.replace('/api/link/create', '/api/link/delete');
+
+      const response = await fetch(deleteApiUrl, {
+        method: 'POST',
+        headers: {
+          'authorization': `Bearer ${token}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ slug })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Remove from history
+      const updatedHistory = (history || []).filter(historyItem => historyItem.short !== item.short);
+
+      // Save to storage
+      await chrome.storage.sync.set({ history: updatedHistory });
+
+      // Reload history display
+      await loadHistory();
+      
+      // Show success message
+      resultDiv.innerHTML = '<strong>Success:</strong> URL deleted successfully';
+      resultDiv.style.display = 'block';
+      setTimeout(() => {
+        resultDiv.style.display = 'none';
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to delete URL:', error);
+      resultDiv.innerHTML = `<strong>Error:</strong> Failed to delete URL: ${error.message}`;
+      resultDiv.style.display = 'block';
+    }
+  };
 });

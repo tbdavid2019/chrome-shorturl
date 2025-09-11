@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const status = document.getElementById('status');
   const toggleTokenBtn = document.getElementById('toggle-token');
   const toggleBackupTokenBtn = document.getElementById('toggle-backup-token');
+  const requestPermissionsBtn = document.getElementById('request-permissions-btn');
+  const permissionsStatus = document.getElementById('permissions-status');
 
   // Toggle password visibility
   const togglePasswordVisibility = (input, button) => {
@@ -20,13 +22,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  toggleTokenBtn.addEventListener('click', () => {
-    togglePasswordVisibility(tokenInput, toggleTokenBtn);
-  });
+  if (toggleTokenBtn) {
+    toggleTokenBtn.addEventListener('click', () => {
+      togglePasswordVisibility(tokenInput, toggleTokenBtn);
+    });
+  }
 
-  toggleBackupTokenBtn.addEventListener('click', () => {
-    togglePasswordVisibility(backupTokenInput, toggleBackupTokenBtn);
-  });
+  if (toggleBackupTokenBtn) {
+    toggleBackupTokenBtn.addEventListener('click', () => {
+      togglePasswordVisibility(backupTokenInput, toggleBackupTokenBtn);
+    });
+  }
 
   // Load current settings
   const { baseUrl, token, backupUrl, backupToken } = await chrome.storage.sync.get(['baseUrl', 'token', 'backupUrl', 'backupToken']);
@@ -46,4 +52,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.textContent = 'Settings saved!';
     setTimeout(() => { status.textContent = ''; }, 2000);
   });
+
+  // Check current permissions status
+  const checkPermissions = async () => {
+    try {
+      const hasPermissions = await chrome.permissions.contains({
+        origins: ['https://*/*']
+      });
+      
+      if (hasPermissions) {
+        permissionsStatus.textContent = '✅ Custom APIs enabled';
+        permissionsStatus.style.color = '#28a745';
+        requestPermissionsBtn.textContent = '✅ Custom APIs Enabled';
+        requestPermissionsBtn.disabled = true;
+      } else {
+        permissionsStatus.textContent = '⚠️ Custom APIs not enabled';
+        permissionsStatus.style.color = '#ffc107';
+        requestPermissionsBtn.textContent = '🔓 Enable Custom APIs';
+        requestPermissionsBtn.disabled = false;
+      }
+    } catch (error) {
+      console.error('Error checking permissions:', error);
+    }
+  };
+
+  // Request optional permissions
+  requestPermissionsBtn.addEventListener('click', async () => {
+    try {
+      const granted = await chrome.permissions.request({
+        origins: ['https://*/*']
+      });
+      
+      if (granted) {
+        permissionsStatus.textContent = '✅ Custom APIs enabled successfully!';
+        permissionsStatus.style.color = '#28a745';
+        requestPermissionsBtn.textContent = '✅ Custom APIs Enabled';
+        requestPermissionsBtn.disabled = true;
+      } else {
+        permissionsStatus.textContent = '❌ Permission denied';
+        permissionsStatus.style.color = '#dc3545';
+      }
+    } catch (error) {
+      console.error('Error requesting permissions:', error);
+      permissionsStatus.textContent = '❌ Error requesting permissions';
+      permissionsStatus.style.color = '#dc3545';
+    }
+  });
+
+  // Initial permissions check
+  checkPermissions();
 });

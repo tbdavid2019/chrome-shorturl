@@ -15,11 +15,11 @@
   <label for="base-url">Base URL:</label>
   <input type="text" id="base-url" placeholder="https://aiurl.tw/api/link/create">
   
-  <!-- <label for="token">Authorization Token:</label>
+  <label for="token">Authorization Token:</label>
   <div style="position: relative;">
     <input type="password" id="token" placeholder="Enter your authorization token" style="width: calc(100% - 40px);">
     <button type="button" id="toggle-token" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 14px;">👁️</button>
-  </div> -->
+  </div>
   
   <label for="backup-url">Backup Base URL (optional):</label>
   <input type="text" id="backup-url" placeholder="">
@@ -31,6 +31,18 @@
   </div>
   
   <button id="save-btn">Save</button>
+  
+  <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
+    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #495057;">Custom API Support</h4>
+    <p style="margin: 0 0 10px 0; font-size: 12px; color: #6c757d;">
+      To use custom APIs outside of aiurl.tw and glsoft.ai, you need to grant additional permissions.
+    </p>
+    <button id="request-permissions-btn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+      🔓 Enable Custom APIs
+    </button>
+    <div id="permissions-status" style="margin-top: 8px; font-size: 11px;"></div>
+  </div>
+  
   <div id="status"></div>
   <script src="options.js"></script>
 </body>

@@ -67,6 +67,37 @@ Response:
   }
 ```
 
+## � 文檔索引 (Documentation Index)
+
+本專案包含多個詳細的說明文檔，幫助開發者和用戶了解擴展的各項功能：
+
+### 🔧 **開發相關文檔**
+- **[test-api.md](./test-api.md)** - API 測試說明和請求格式範例
+- **[test-checklist.md](./test-checklist.md)** - 完整的功能測試清單，包含 API 測試和用戶流程測試
+- **[permissions-strategy.md](./permissions-strategy.md)** - Chrome 擴展權限策略說明，解釋為什麼不使用通配符
+
+### 📊 **功能特性文檔**
+- **[stats-feature.md](./stats-feature.md)** - 統計功能說明，包含 visits、visitors、referers 數據顯示
+- **[edit-delete-feature.md](./edit-delete-feature.md)** - 編輯和刪除功能說明，包含 API 整合和用戶介面
+- **[refresh-feature.md](./refresh-feature.md)** - 歷史頁面刷新功能說明，解決多分頁同步問題
+
+### 📋 **政策和隱私**
+- **[PRIVACY.md](./PRIVACY.md)** - 完整的隱私權政策，符合 Chrome Web Store 要求
+
+### 📖 **如何使用這些文檔**
+
+| 文檔 | 適用對象 | 主要內容 |
+|------|----------|----------|
+| `test-api.md` | 開發者 | API 請求格式、測試範例 |
+| `test-checklist.md` | 開發者/測試者 | 系統性測試所有功能 |
+| `permissions-strategy.md` | 開發者 | Chrome Web Store 上架權限策略 |
+| `stats-feature.md` | 開發者/用戶 | 統計功能使用說明 |
+| `edit-delete-feature.md` | 開發者/用戶 | 編輯刪除功能使用說明 |
+| `refresh-feature.md` | 用戶 | 歷史頁面刷新功能說明 |
+| `PRIVACY.md` | 用戶/Chrome Store | 隱私權政策和數據處理說明 |
+
+---
+
 ## 🔒 隱私權保護
 
 - ✅ 不收集任何個人資料
@@ -85,16 +116,24 @@ Response:
 ### 專案結構
 ```
 chrome-shorturl/
-├── manifest.json          # 擴展配置
-├── background.js          # 背景腳本
-├── popup.html            # 彈出窗口
-├── popup.js              # 彈出窗口邏輯
-├── options.html          # 設定頁面
-├── options.js            # 設定頁面邏輯
-├── history.html          # 歷史記錄頁面
-├── history.js            # 歷史記錄邏輯
-├── icons/                # 圖標文件
-└── PRIVACY.md            # 隱私權政策
+├── manifest.json                 # 擴展配置
+├── background.js                 # 背景腳本
+├── popup.html                    # 彈出窗口
+├── popup.js                      # 彈出窗口邏輯
+├── options.html                  # 設定頁面
+├── options.js                    # 設定頁面邏輯
+├── history.html                  # 歷史記錄頁面
+├── history.js                    # 歷史記錄邏輯
+├── utils.js                      # 共用工具函數
+├── icons/                        # 圖標文件
+├── PRIVACY.md                    # 隱私權政策
+├── README.md                     # 主要說明文檔
+├── test-api.md                   # API 測試說明
+├── test-checklist.md             # 功能測試清單
+├── permissions-strategy.md       # 權限策略說明
+├── stats-feature.md              # 統計功能說明
+├── edit-delete-feature.md        # 編輯刪除功能說明
+└── refresh-feature.md            # 刷新功能說明
 ```
 
 ### 本地開發
@@ -201,6 +240,7 @@ Response:
 ### Project Structure
 ```
 chrome-shorturl/
+<<<<<<< HEAD
 ├── manifest.json          # Extension configuration
 ├── background.js          # Background script
 ├── popup.html            # Popup window
@@ -214,6 +254,56 @@ chrome-shorturl/
 ```
 
 ### Local Development
+=======
+├── manifest.json                 # Extension configuration
+├── background.js                 # Background script
+├── popup.html                    # Popup window
+├── popup.js                      # Popup window logic
+├── options.html                  # Settings page
+├── options.js                    # Settings page logic
+├── history.html                  # History page
+├── history.js                    # History page logic
+├── utils.js                      # Shared utility functions
+├── icons/                        # Icon files
+├── PRIVACY.md                    # Privacy policy
+├── README.md                     # Main documentation
+├── test-api.md                   # API testing guide
+├── test-checklist.md             # Feature testing checklist
+├── permissions-strategy.md       # Permissions strategy guide
+├── stats-feature.md              # Statistics feature guide
+├── edit-delete-feature.md        # Edit/delete feature guide
+└── refresh-feature.md            # Refresh feature guide
+```
+
+## Documentation Index
+
+This project includes comprehensive documentation for different aspects of the extension:
+
+### Development Documentation
+
+| Document | Purpose | Target Audience |
+|----------|---------|----------------|
+| `test-api.md` | API testing procedures and examples | Developers testing API integration |
+| `test-checklist.md` | Comprehensive feature testing checklist | QA testers and developers |
+| `permissions-strategy.md` | Chrome Web Store permissions strategy | Developers, Store reviewers |
+
+### Feature Documentation
+
+| Document | Purpose | Target Audience |
+|----------|---------|----------------|
+| `stats-feature.md` | Statistics display functionality | Users, Feature reviewers |
+| `edit-delete-feature.md` | URL management capabilities | Users, Feature reviewers |
+| `refresh-feature.md` | Data synchronization and refresh | Users, Troubleshooters |
+
+### Policy Documentation
+
+| Document | Purpose | Target Audience |
+|----------|---------|----------------|
+| `PRIVACY.md` | Privacy policy and data handling | Users, Store reviewers |
+
+### Local Development
+
+>>>>>>> de2aaf5 (1.1版本 增加了許多 edit / del /  還有統計數據)
 ```bash
 git clone https://github.com/tbdavid2019/chrome-shorturl.git
 cd chrome-shorturl
@@ -236,4 +326,6 @@ Issues and Pull Requests are welcome!
 
 ---
 
-**Made with ❤️ by DAVID**
+## Author
+
+Made with ❤️ by DAVID
