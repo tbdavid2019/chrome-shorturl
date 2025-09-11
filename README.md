@@ -25,6 +25,13 @@
 4. 點擊 "載入未封裝項目"，選擇專案資料夾
 5. 安裝完成！
 
+
+### 打包方式
+
+```
+zip -r chrome-shorturl-extension.zip . -x "*.md" "*.git*" "*.DS_Store" "test-*" "permissions-strategy.md" "stats-feature.md" "edit-delete-feature.md" "refresh-feature.md"
+```
+
 ## 🎯 使用方法
 
 ### 快速縮短
