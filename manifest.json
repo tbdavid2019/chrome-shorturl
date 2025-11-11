@@ -1,15 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Short URL Extension 333 ",
-  "version": "1.1",
-  "description": "Shorten URLs using cf worker API - DAVID888.com",
+  "name": "Shorten and undo closed URL  333 ",
+  "version": "2.1.0",
+  "description": "Shorten URLs & Restore closed tabs 短網址生成器 & 恢復已關閉分頁",
   "permissions": [
     "contextMenus",
     "storage",
     "activeTab",
     "clipboardWrite",
     "notifications",
-    "scripting"
+    "scripting",
+    "tabs",
+    "sessions"
   ],
   "host_permissions": [
     "https://aiurl.tw/*",

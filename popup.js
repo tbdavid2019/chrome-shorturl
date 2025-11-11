@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resultDiv = document.getElementById('result');
   const clearHistoryBtn = document.getElementById('clear-history-btn');
   const viewAllBtn = document.getElementById('view-all-btn');
+  const restoreLastTabBtn = document.getElementById('restore-last-tab-btn');
+  const closedTabsList = document.getElementById('closed-tabs-list');
 
   // Format time ago
   const timeAgo = (timestamp) => {
@@ -25,6 +27,142 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (minutes > 0) return `${minutes}m ago`;
     return 'Just now';
   };
+
+  // Load recently closed tabs
+  const loadClosedTabs = async () => {
+    try {
+      const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 10 });
+      closedTabsList.innerHTML = '';
+      
+      if (sessions && sessions.length > 0) {
+        sessions.forEach((session, index) => {
+          if (session.tab) {
+            const item = document.createElement('div');
+            item.className = 'closed-tab-item';
+            
+            const info = document.createElement('div');
+            info.className = 'closed-tab-info';
+            
+            const title = document.createElement('div');
+            title.className = 'closed-tab-title';
+            title.textContent = session.tab.title || 'Untitled';
+            title.title = session.tab.title;
+            
+            const url = document.createElement('div');
+            url.className = 'closed-tab-url';
+            url.textContent = session.tab.url;
+            url.title = session.tab.url;
+            
+            info.appendChild(title);
+            info.appendChild(url);
+            
+            const time = document.createElement('div');
+            time.className = 'closed-tab-time';
+            time.textContent = timeAgo(session.lastModified * 1000);
+            
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'restore-btn';
+            restoreBtn.textContent = '↩️ Restore';
+            restoreBtn.onclick = async (e) => {
+              e.stopPropagation();
+              await chrome.sessions.restore(session.tab.sessionId);
+              await loadClosedTabs();
+            };
+            
+            // Click on item to restore
+            item.onclick = async () => {
+              await chrome.sessions.restore(session.tab.sessionId);
+              await loadClosedTabs();
+            };
+            
+            item.appendChild(info);
+            item.appendChild(time);
+            item.appendChild(restoreBtn);
+            
+            closedTabsList.appendChild(item);
+          } else if (session.window) {
+            // Handle closed windows
+            const item = document.createElement('div');
+            item.className = 'closed-tab-item';
+            item.style.background = '#e3f2fd';
+            item.style.borderColor = '#2196f3';
+            
+            const info = document.createElement('div');
+            info.className = 'closed-tab-info';
+            
+            const title = document.createElement('div');
+            title.className = 'closed-tab-title';
+            title.textContent = `🪟 Window with ${session.window.tabs.length} tabs`;
+            
+            info.appendChild(title);
+            
+            const time = document.createElement('div');
+            time.className = 'closed-tab-time';
+            time.textContent = timeAgo(session.lastModified * 1000);
+            
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'restore-btn';
+            restoreBtn.style.background = '#2196f3';
+            restoreBtn.textContent = '↩️ Restore';
+            restoreBtn.onclick = async (e) => {
+              e.stopPropagation();
+              await chrome.sessions.restore(session.window.sessionId);
+              await loadClosedTabs();
+            };
+            
+            item.onclick = async () => {
+              await chrome.sessions.restore(session.window.sessionId);
+              await loadClosedTabs();
+            };
+            
+            item.appendChild(info);
+            item.appendChild(time);
+            item.appendChild(restoreBtn);
+            
+            closedTabsList.appendChild(item);
+          }
+        });
+      } else {
+        const noTabs = document.createElement('div');
+        noTabs.className = 'no-history';
+        noTabs.style.padding = '10px';
+        noTabs.textContent = 'No recently closed tabs';
+        closedTabsList.appendChild(noTabs);
+      }
+    } catch (error) {
+      console.error('Error loading closed tabs:', error);
+      closedTabsList.innerHTML = '<div class="no-history" style="padding: 10px;">Unable to load closed tabs</div>';
+    }
+  };
+
+  // Restore last closed tab
+  restoreLastTabBtn.addEventListener('click', async () => {
+    try {
+      const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 1 });
+      if (sessions && sessions.length > 0) {
+        const session = sessions[0];
+        if (session.tab) {
+          await chrome.sessions.restore(session.tab.sessionId);
+        } else if (session.window) {
+          await chrome.sessions.restore(session.window.sessionId);
+        }
+        await loadClosedTabs();
+      } else {
+        resultDiv.innerHTML = '<strong>Info:</strong> No closed tabs to restore';
+        resultDiv.style.display = 'block';
+        setTimeout(() => {
+          resultDiv.style.display = 'none';
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error restoring tab:', error);
+      resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+      resultDiv.style.display = 'block';
+    }
+  });
+
+  // Load closed tabs
+  await loadClosedTabs();
 
   // Load history
   const loadHistory = async () => {
