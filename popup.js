@@ -164,10 +164,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load closed tabs
   await loadClosedTabs();
 
+  let historyLoadSequence = 0;
+
   // Load history
   const loadHistory = async () => {
+    const loadId = ++historyLoadSequence;
     const { history, baseUrl, token } = await chrome.storage.sync.get(['history', 'baseUrl', 'token']);
     historyList.innerHTML = '';
+
+    // If a newer load request started while awaiting storage, abort this render
+    if (loadId !== historyLoadSequence) {
+      return;
+    }
+
     if (history && history.length > 0) {
       const recentHistory = history.slice(0, 10);
       
@@ -178,6 +187,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           return { ...item, stats };
         })
       );
+
+      if (loadId !== historyLoadSequence) {
+        return;
+      }
       
       historyWithStats.forEach(item => {
         const li = document.createElement('li');
@@ -267,6 +280,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         historyList.appendChild(li);
       });
     } else {
+      if (loadId !== historyLoadSequence) {
+        return;
+      }
+
       const noHistory = document.createElement('li');
       noHistory.className = 'no-history';
       noHistory.textContent = 'No shortened URLs yet';

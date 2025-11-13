@@ -150,6 +150,12 @@ cd chrome-shorturl
 # 在 Chrome 中載入未封裝的擴展
 ```
 
+
+打包方式
+```
+zip -r ../chrome-shorturl-extension.zip . -x "*.git*" -x "*.DS_Store" -x "*.md" -x ".gitignore"
+```
+
 ## 📄 授權條款
 
 請聯絡開發者了解授權相關事宜。

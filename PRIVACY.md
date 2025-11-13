@@ -1,7 +1,7 @@
 # 隱私權政策 (Privacy Policy)
 
 **Short URL Extension**  
-**最後更新日期：2025年9月9日**
+**最後更新日期：2025年11月13日**
 
 ## 概述
 
@@ -25,10 +25,12 @@ Short URL Extension（以下簡稱「本擴展」）致力於保護用戶的隱�
    - Authorization Token（您提供的 API 憑證）
 
 2. **縮短網址歷史記錄**
-   - 原始網址
-   - 縮短後的網址
-   - 頁面標題
+   - 原始網址與縮短後的網址
+   - 頁面標題與自訂備註
+   - 自訂短碼（slug）與到期設定（若提供）
    - 創建時間戳
+3. **備用 API 設定（可選）**
+   - 備用 Base URL 與 Authorization Token（僅在您設定時儲存）
 
 ## 資料使用
 
@@ -39,7 +41,7 @@ Short URL Extension（以下簡稱「本擴展」）致力於保護用戶的隱�
 
 ### 外部 API 通訊
 
-本擴展會向您配置的縮網址服務（如 aiurl.tw、glsoft.ai）發送 HTTPS 請求，包含：
+本擴展會向您配置的縮網址服務（如 aiurl.tw、glsoft.ai 或您自訂的服務）發送 HTTPS 請求，包含：
 
 - 要縮短的網址
 - 您的 API 憑證
@@ -61,15 +63,16 @@ Short URL Extension（以下簡稱「本擴展」）致力於保護用戶的隱�
 
 ## 權限使用
 
-本擴展請求的權限僅用於核心功能：
+本擴展請求的權限僅用於以下核心功能：
 
 - **contextMenus**：在右鍵選單中添加縮短網址選項
-- **storage**：在本地存儲設定和歷史記錄
-- **activeTab**：獲取當前頁面 URL 和標題
+- **storage**：在本地存儲設定與歷史記錄
+- **activeTab / tabs**：獲取當前頁面 URL、標題並開啟結果頁面
+- **sessions**：讀取 Chrome 內建的「最近關閉的分頁」列表，以便提供回復分頁功能（不會將該資料另外儲存或傳出）
 - **clipboardWrite**：將縮短的網址複製到剪貼板
 - **notifications**：顯示操作結果通知
 - **scripting**：在頁面環境中執行剪貼板操作
-- **host_permissions**：向指定的縮網址服務發送 API 請求
+- **host_permissions / optional_host_permissions**：向您指定的縮網址服務發送 API 請求
 
 ## 資料控制
 
@@ -91,11 +94,7 @@ Short URL Extension（以下簡稱「本擴展」）致力於保護用戶的隱�
 
 ## 第三方服務
 
-本擴展可能與以下第三方縮網址服務互動：
-
-- aiurl.tw
-- glsoft.ai
-- 其他用戶自定義的服務
+本擴展僅在您設定後與對應的縮網址服務互動，例如 aiurl.tw、glsoft.ai，或您自行輸入的任何相容 API。這些請求遵循相應服務的隱私政策。
 
 這些服務有各自的隱私政策，我們建議您查閱相關政策以了解它們如何處理您的資料。
 
