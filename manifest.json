@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Shorten and undo closed URL  333 ",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Shorten URLs & Restore closed tabs 短網址生成器 & 恢復已關閉分頁",
   "permissions": [
     "contextMenus",

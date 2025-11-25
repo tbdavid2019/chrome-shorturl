@@ -204,6 +204,30 @@ A simple and easy-to-use Chrome browser extension that quickly converts long URL
 - **Right-click**: Right-click any link → Select "Shorten URL"
 - **Generate QR code**: After a URL is shortened, click “Generate URL QR code” in the popup to get an offline-generated QR for that short link
 
+## 🏪 Chrome Web Store 上架描述（建議文案）
+
+「快速縮短網址 & 恢復已關閉分頁」
+
+本擴展提供兩大核心功能：
+
+1. 【短網址生成】
+   - 將長網址縮短為短網址
+   - 支援自訂 URL 短代碼
+   - 可設定網址過期時間
+   - 快速將當前頁面或自定義網址透過 API 服務縮短
+   - 自動複製到剪貼板
+   - 提供歷史記錄管理，追蹤已縮短的網址
+   - 支援編輯和刪除已建立的短網址
+   - 一鍵產生對應的網址 QR code（離線生成，無外部載入）
+
+2. 【恢復關閉分頁】
+   - 一鍵恢復最後關閉的分頁
+   - 顯示最近 10 個關閉的分頁列表
+   - 支援恢復整個已關閉的視窗
+   - 顯示分頁標題、網址和關閉時間
+
+讓您的瀏覽更有效率！
+
 ### History Records
 - View the last 10 records in the popup window
 - Click "View All" to access the complete history page
