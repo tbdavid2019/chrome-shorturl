@@ -1,5 +1,5 @@
 # Chrome Extension .gitignore
-
+.syncthing.*
 # OS generated files
 .DS_Store
 .DS_Store?

@@ -21,7 +21,7 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.storage.sync.set({ baseUrl: 'https://aiurl.tw/api/link/create' });
     }
     if (!result.token) {
-      chrome.storage.sync.set({ token: '' }); // Updated default token for aiurl.tw
+      chrome.storage.sync.set({ token: 'OtwD-9Gk-dn1' }); // Updated default token for aiurl.tw
     }
   });
 });

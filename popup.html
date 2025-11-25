@@ -4,102 +4,153 @@
   <meta charset="utf-8">
   <title>Shorten and Restore URL</title>
   <style>
+    :root {
+      --green: #15a34a;
+      --green-dark: #0f8a3d;
+      --amber: #f59e0b;
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
     body { 
-      width: 350px; 
-      height: 600px;
-      padding: 20px; 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f8f9fa;
+      width: 360px; 
+      height: 620px;
+      padding: 16px; 
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(21,163,74,0.08), transparent 40%), var(--bg);
       margin: 0;
       overflow-y: auto;
+      color: #111827;
     }
     
     .container {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      min-height: calc(100% - 40px);
-    }
-    
-    h3 {
-      margin: 0 0 20px 0;
-      color: #333;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 600;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-height: calc(100% - 32px);
+      border: 1px solid rgba(21,163,74,0.08);
     }
     
     .section {
-      margin-bottom: 25px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #e9ecef;
+      margin-bottom: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff, #fdfdfd);
     }
     
-    .section:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
+    .section.emphasis {
+      border-color: rgba(21,163,74,0.2);
+      background: linear-gradient(180deg, #f1f8f4, #ffffff);
     }
-    
+
     .section-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #495057;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
       margin-bottom: 12px;
       display: flex;
       align-items: center;
+      gap: 8px;
+      letter-spacing: -0.01em;
     }
     
     .section-title::before {
       content: '';
-      width: 4px;
-      height: 16px;
-      background: #4CAF50;
-      margin-right: 8px;
-      border-radius: 2px;
+      width: 6px;
+      height: 18px;
+      background: var(--green);
+      border-radius: 4px;
     }
     
     .button { 
-      background: linear-gradient(135deg, #4CAF50, #45a049);
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
       color: white; 
-      padding: 12px 16px; 
-      margin: 8px 0; 
+      padding: 12px 14px; 
       border: none; 
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer; 
       width: 100%;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+      box-shadow: 0 6px 14px rgba(21, 163, 74, 0.25);
     }
     
     .button:hover { 
-      background: linear-gradient(135deg, #45a049, #3d8b40);
+      background: linear-gradient(135deg, var(--green-dark), #0d7236);
       transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 10px 20px rgba(21, 163, 74, 0.30);
     }
     
     .button:active {
       transform: translateY(0);
     }
+
+    .secondary {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      box-shadow: 0 6px 14px rgba(14,165,233,0.24);
+    }
+
+    .warning {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 6px 14px rgba(217,119,6,0.24);
+    }
+
+    .qr-card {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      background: #f8fafc;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+    }
+
+    .qr-card.hidden {
+      display: none;
+    }
+
+    .qr-code-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0 4px;
+    }
+
+    .qr-link {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #0f8a3d;
+      text-align: center;
+      word-break: break-all;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .qr-link:hover {
+      text-decoration: underline;
+    }
     
     .url-input { 
       width: 100%; 
-      padding: 12px 16px; 
+      padding: 12px 14px; 
       margin: 8px 0; 
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
       font-size: 14px;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
       box-sizing: border-box;
-      background: white;
+      background: #ffffff;
     }
     
     .url-input:focus {
       outline: none;
-      border-color: #4CAF50;
-      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+      border-color: rgba(21,163,74,0.8);
+      box-shadow: 0 0 0 3px rgba(21, 163, 74, 0.15);
     }
     
     select.url-input {
@@ -109,17 +160,17 @@
     
     .result { 
       background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
-      padding: 16px; 
+      padding: 14px; 
       margin: 12px 0; 
-      border-radius: 8px;
+      border-radius: 10px;
       word-break: break-all;
       border: 1px solid #c8e6c9;
       font-size: 13px;
     }
     
     .result a {
-      color: #2e7d32;
-      font-weight: 500;
+      color: #0f8a3d;
+      font-weight: 600;
     }
     
     .history-list { 
@@ -131,10 +182,11 @@
     .history-item { 
       margin-bottom: 12px; 
       font-size: 12px;
-      background: #f8f9fa;
+      background: #f8fafc;
       padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
     }
     
     .history-content {
@@ -148,23 +200,24 @@
       justify-content: space-between;
       align-items: center;
       font-size: 11px;
-      color: #6c757d;
+      color: var(--muted);
     }
     
     .history-title {
-      font-weight: 600;
-      color: #333;
+      font-weight: 700;
+      color: #0f172a;
       font-size: 13px;
       margin-bottom: 4px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      letter-spacing: -0.01em;
     }
     
     .history-stats {
       font-size: 11px;
-      color: #28a745;
-      font-weight: 500;
+      color: var(--green-dark);
+      font-weight: 600;
       margin-bottom: 6px;
     }
     
@@ -176,12 +229,13 @@
     }
     
     .history-item a { 
-      color: #007bff; 
+      color: #0ea5e9; 
       text-decoration: none;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       flex: 1;
+      font-weight: 600;
     }
     
     .history-item a:hover { 
@@ -189,83 +243,86 @@
     }
     
     .copy-btn {
-      background: #007bff;
+      background: #111827;
       color: white;
       border: none;
       padding: 6px 12px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 10px;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.2s ease, transform 0.15s ease;
       white-space: nowrap;
     }
     
     .copy-btn:hover {
-      background: #0056b3;
+      background: #0f172a;
+      transform: translateY(-1px);
     }
     
     .copy-btn.copied {
-      background: #28a745;
+      background: var(--green);
     }
     
     .history-actions {
       display: flex;
-      gap: 4px;
+      gap: 6px;
       margin-top: 4px;
     }
     
     .mini-btn {
-      background: #6c757d;
+      background: #6b7280;
       color: white;
       border: none;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 9px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
       cursor: pointer;
       transition: background 0.2s ease;
     }
     
     .mini-btn.delete {
-      background: #dc3545;
+      background: #dc2626;
     }
     
     .mini-btn.delete:hover {
-      background: #c82333;
+      background: #b91c1c;
     }
     
     .options-btn {
-      background: linear-gradient(135deg, #6c757d, #5a6268);
-      margin-top: 15px;
+      background: linear-gradient(135deg, #4b5563, #1f2937);
+      margin-top: 12px;
+      box-shadow: 0 6px 14px rgba(31,41,55,0.28);
     }
     
     .options-btn:hover {
-      background: linear-gradient(135deg, #5a6268, #495057);
+      background: linear-gradient(135deg, #1f2937, #0f172a);
     }
     
     .no-history {
       text-align: center;
-      color: #6c757d;
+      color: var(--muted);
       font-style: italic;
-      padding: 20px;
+      padding: 14px;
     }
     
     .closed-tab-item {
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 6px;
-      padding: 8px 12px;
-      margin-bottom: 6px;
+      background: #fff7ed;
+      border: 1px solid #fb923c;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
       font-size: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      transition: background 0.2s ease;
+      transition: background 0.2s ease, transform 0.15s ease;
       cursor: pointer;
     }
     
     .closed-tab-item:hover {
-      background: #ffe8a1;
+      background: #ffedd5;
+      transform: translateY(-1px);
     }
     
     .closed-tab-info {
@@ -274,8 +331,8 @@
     }
     
     .closed-tab-title {
-      font-weight: 600;
-      color: #333;
+      font-weight: 700;
+      color: #9a3412;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -283,25 +340,25 @@
     }
     
     .closed-tab-url {
-      color: #666;
-      font-size: 10px;
+      color: #92400e;
+      font-size: 11px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     
     .closed-tab-time {
-      color: #856404;
+      color: #b45309;
       font-size: 10px;
       white-space: nowrap;
     }
     
     .restore-btn {
-      background: #28a745;
+      background: #16a34a;
       color: white;
       border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 6px 10px;
+      border-radius: 6px;
       font-size: 10px;
       cursor: pointer;
       white-space: nowrap;
@@ -309,60 +366,193 @@
     }
     
     .restore-btn:hover {
-      background: #218838;
+      background: #15803d;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .advanced-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      color: #0f172a;
+      font-weight: 600;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-align: left;
+    }
+
+    .advanced-toggle:hover {
+      border-color: rgba(21,163,74,0.7);
+      color: var(--green-dark);
+    }
+
+    .advanced-fields {
+      margin-top: 8px;
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .advanced-fields.open {
+      display: block;
+    }
+
+    .settings {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(21,163,74,0.12);
+      color: var(--green-dark);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h3>🔗 Shorten and Restore URL</h3>
-    
-    <div class="section">
-      <div class="section-title">🔄 Recently Closed Tabs / 復原關閉頁籤</div>
-      <button id="restore-last-tab-btn" class="button" style="background: linear-gradient(135deg, #ff9800, #f57c00);">⏮️ Restore Last Closed Tab</button>
-      <div id="closed-tabs-list" style="max-height: 200px; overflow-y: auto; margin-top: 8px;"></div>
+    <div class="section emphasis">
+      <button id="restore-last-tab-btn" class="button warning"><span>⏮️</span> <span data-i18n="restoreLast">Restore Last Closed Tab</span></button>
+      <div class="divider"></div>
+      <div id="closed-tabs-list" style="max-height: 300px; overflow-y: auto; margin-top: 8px;"></div>
     </div>
 
     <div class="section">
-      <div class="section-title">縮短網址</div>
-      <button id="shorten-current-btn" class="button">📄 Shorten URL</button>
+      <div class="pill muted" data-i18n="shortenCurrentHint">One tap for the active tab</div>
+      <button id="shorten-current-btn" class="button">📄 <span data-i18n="shortenCurrentBtn">Shorten URL</span></button>
+      <button id="generate-qr-btn" class="button secondary" style="margin-top: 8px;">🔳 <span data-i18n="generateQr">Generate URL QR code</span></button>
+      <div id="qr-container" class="qr-card hidden">
+        <div class="muted" style="font-weight: 700; text-align: center;" data-i18n="qrHint">QR code for your latest short link</div>
+        <div class="qr-code-wrapper">
+          <div id="qr-code"></div>
+        </div>
+        <a id="qr-link" class="qr-link" href="#" target="_blank" rel="noopener"></a>
+      </div>
     </div>
     
 
     <div class="section">
-      <div class="section-title">Custom URL</div>
-      <input type="text" id="custom-url" class="url-input" placeholder="Enter any URL to shorten...">
-      <input type="text" id="custom-comment" class="url-input" placeholder="Add comment (optional)...">
-      <input type="text" id="custom-slug" class="url-input" placeholder="Custom short code (optional)...">
-      <select id="expiration-select" class="url-input" style="height: 44px;">
-        <option value="">No expiration</option>
-        <option value="1h">1 hour</option>
-        <option value="24h">24 hours</option>
-        <option value="7d">7 days</option>
-        <option value="30d">30 days</option>
-        <option value="1y">1 year</option>
-      </select>
-      <button id="shorten-custom-btn" class="button">🔗 Shorten Custom URL</button>
+      <div class="section-title">🎯 <span data-i18n="customTitle">Custom URL</span></div>
+      <input type="text" id="custom-url" class="url-input" placeholder="Enter any URL to shorten..." data-i18n-placeholder="customUrlPlaceholder">
+      <button id="advanced-toggle" class="advanced-toggle">
+        <span>⚙️</span>
+        <span data-i18n="advancedToggle">Show advanced options</span>
+      </button>
+      <div id="advanced-fields" class="advanced-fields">
+        <input type="text" id="custom-comment" class="url-input" placeholder="Add comment (optional)..." data-i18n-placeholder="commentPlaceholder">
+        <input type="text" id="custom-slug" class="url-input" placeholder="Custom short code (optional)..." data-i18n-placeholder="slugPlaceholder">
+        <select id="expiration-select" class="url-input select" style="height: 44px;">
+          <option value="" data-i18n="expireNone">No expiration</option>
+          <option value="1h" data-i18n="expire1h">1 hour</option>
+          <option value="24h" data-i18n="expire24h">24 hours</option>
+          <option value="7d" data-i18n="expire7d">7 days</option>
+          <option value="30d" data-i18n="expire30d">30 days</option>
+          <option value="1y" data-i18n="expire1y">1 year</option>
+        </select>
+      </div>
+      <button id="shorten-custom-btn" class="button" style="margin-top: 6px;">🔗 <span data-i18n="shortenCustomBtn">Shorten Custom URL</span></button>
     </div>
     
     <div id="result" class="result" style="display: none;"></div>
     
     <div class="section">
-      <div class="section-title">📚 Recent URLs</div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 12px; color: #6c757d;">Last 10 shortened URLs</span>
+      <div class="row" style="margin-bottom: 12px;">
+        <div class="section-title" style="margin: 0;">📚 <span data-i18n="recentUrls">Recent URLs</span></div>
+        <span class="tag" data-i18n="recentBadge">Latest 10</span>
+      </div>
+      <div class="toolbar">
+        <span class="muted" data-i18n="recentSubtitle">Quick access to your last links</span>
         <div style="display: flex; gap: 8px;">
-          <button id="view-all-btn" style="background: #007bff; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">📋 View All</button>
-          <button id="clear-history-btn" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">🗑️ Clear</button>
+          <button id="view-all-btn" style="background: #0ea5e9; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;">📋 <span data-i18n="viewAll">View All</span></button>
+          <button id="clear-history-btn" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;">🗑️ <span data-i18n="clear">Clear</span></button>
         </div>
       </div>
       <ul id="history-list" class="history-list"></ul>
     </div>
+
+    <div class="section">
+      <div class="section-title">🛠️ <span data-i18n="settingsTitle">Settings</span></div>
+      <div class="settings">
+        <label class="muted" style="font-weight: 700; color: #0f172a;" for="language-select" data-i18n="languageLabel">Language</label>
+        <select id="language-select" class="select">
+          <option value="auto" data-i18n="languageAuto">Auto (detect)</option>
+          <option value="en" data-i18n="languageEn">English</option>
+          <option value="zh-TW" data-i18n="languageZh">繁體中文</option>
+        </select>
+        <div class="muted" style="font-size: 11px;" data-i18n="languageHint">Default follows your browser; override here anytime.</div>
+      </div>
+    </div>
     
-    <button id="options-btn" class="button options-btn">⚙️ Settings</button>
+    <button id="options-btn" class="button options-btn">⚙️ <span data-i18n="openSettings">Backend Settings</span></button>
   </div>
   
   <script src="utils.js"></script>
+  <script src="libs/qrcode.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

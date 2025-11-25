@@ -11,6 +11,7 @@
 - ⚙️ **自定義 API**：支援配置自己的縮網址服務
 - 📋 **自動複製**：縮短後自動複製到剪貼板
 - 🔔 **即時通知**：操作結果即時反饋
+- 📷 **產生短網址 QR code**：縮短後一鍵生成 QR，離線本地產生不需外部載入
 
 ## 🚀 安裝方式
 
@@ -38,6 +39,7 @@ zip -r chrome-shorturl-extension.zip . -x "*.md" "*.git*" "*.DS_Store" "test-*" 
 - **當前頁面**：點擊擴展圖標 → 點擊 "縮短當前頁面網址"
 - **自定義網址**：點擊擴展圖標 → 輸入網址 → 點擊 "縮短自定義網址"
 - **右鍵操作**：右鍵任何鏈接 → 選擇 "縮短網址"
+- **產生 QR code**：縮短成功後，點擊「產生網址QR code」按鈕即可在彈窗中生成對應 QR（離線生成）
 
 ### 歷史記錄
 - 在彈出窗口查看最近 10 筆記錄
@@ -179,6 +181,7 @@ A simple and easy-to-use Chrome browser extension that quickly converts long URL
 - ⚙️ **Custom API**: Support for configuring your own URL shortening service
 - 📋 **Auto-copy**: Automatically copy shortened URLs to clipboard
 - 🔔 **Instant notifications**: Real-time feedback on operations
+- 📷 **QR code generation**: After shortening, click “Generate URL QR code” in the popup to create a QR code locally (no external loading)
 
 ## 🚀 Installation
 
@@ -199,6 +202,7 @@ A simple and easy-to-use Chrome browser extension that quickly converts long URL
 - **Current page**: Click extension icon → Click "Shorten Current Page URL"
 - **Custom URL**: Click extension icon → Enter URL → Click "Shorten Custom URL"
 - **Right-click**: Right-click any link → Select "Shorten URL"
+- **Generate QR code**: After a URL is shortened, click “Generate URL QR code” in the popup to get an offline-generated QR for that short link
 
 ### History Records
 - View the last 10 records in the popup window

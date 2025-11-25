@@ -1,5 +1,145 @@
 // Popup script
 document.addEventListener('DOMContentLoaded', async () => {
+  const translations = {
+    en: {
+      recentTabs: 'Recently Closed Tabs',
+      restoreLast: 'Restore Last Closed Tab',
+      shortenCurrentTitle: 'Shorten Current Page',
+      shortenCurrentHint: 'One tap for the active tab',
+      shortenCurrentBtn: 'Shorten URL',
+      generateQr: 'Generate URL QR code',
+      qrHint: 'QR code for your latest short link',
+      qrNeedUrl: 'Please shorten a URL first',
+      customTitle: 'Custom URL',
+      customUrlPlaceholder: 'Enter any URL to shorten...',
+      advancedShow: 'Show advanced options',
+      advancedHide: 'Hide advanced options',
+      commentPlaceholder: 'Add comment (optional)...',
+      slugPlaceholder: 'Custom short code (optional)...',
+      expireNone: 'No expiration',
+      expire1h: '1 hour',
+      expire24h: '24 hours',
+      expire7d: '7 days',
+      expire30d: '30 days',
+      expire1y: '1 year',
+      shortenCustomBtn: 'Shorten Custom URL',
+      recentUrls: 'Recent URLs',
+      recentBadge: 'Latest 10',
+      recentSubtitle: 'Quick access to your last links',
+      viewAll: 'View All',
+      clear: 'Clear',
+      settingsTitle: 'Settings',
+      languageLabel: 'Language',
+      languageAuto: 'Auto (detect)',
+      languageEn: 'English',
+      languageZh: '繁體中文',
+      languageHint: 'Default follows your browser; override here anytime.',
+      openSettings: 'Backend Settings',
+      noClosedTabs: 'No recently closed tabs',
+      closedTabsError: 'Unable to load closed tabs',
+      infoNoClosed: 'Info: No closed tabs to restore',
+      errorRestore: 'Error restoring tab:',
+      restoreTab: 'Restore',
+      noShortened: 'No shortened URLs yet',
+      statsVisits: 'visits',
+      statsVisitors: 'visitors',
+      statsReferers: 'referers',
+      copy: 'Copy',
+      copied: 'Copied!',
+      shortUrlLabel: 'Short URL:',
+      enterUrlAlert: 'Please enter a URL',
+      confirmDelete: 'Delete this URL?',
+      deleteSuccess: 'Success: URL deleted successfully',
+      deleteError: 'Error: Failed to delete URL:',
+      timeDaySuffix: 'd ago',
+      timeHourSuffix: 'h ago',
+      timeMinuteSuffix: 'm ago',
+      timeNow: 'Just now',
+      confirmClearHistory: 'Are you sure you want to clear all history?',
+      configureApi: 'Please configure API settings first',
+      editTitle: 'Edit this URL',
+      deleteTitle: 'Delete this URL',
+      pageLabel: 'Page:',
+      customDefaultComment: 'Custom URL',
+      untitledPage: 'Untitled Page'
+    },
+    'zh-TW': {
+      recentTabs: '復原關閉頁籤',
+      restoreLast: '還原上一個關閉的分頁',
+      shortenCurrentTitle: '縮短目前分頁',
+      shortenCurrentHint: '一鍵縮短目前的頁面',
+      shortenCurrentBtn: '縮短網址',
+      generateQr: '產生網址QR code',
+      qrHint: '為最新短網址產生 QR code',
+      qrNeedUrl: '請先產生短網址',
+      customTitle: '自訂網址',
+      customUrlPlaceholder: '輸入想縮短的網址...',
+      advancedShow: '展開進階參數',
+      advancedHide: '收合進階參數',
+      commentPlaceholder: '備註（選填）...',
+      slugPlaceholder: '自訂短網址代碼（選填）...',
+      expireNone: '不設定到期',
+      expire1h: '1 小時',
+      expire24h: '24 小時',
+      expire7d: '7 天',
+      expire30d: '30 天',
+      expire1y: '1 年',
+      shortenCustomBtn: '縮短自訂網址',
+      recentUrls: '近期產生',
+      recentBadge: '最新 10 筆',
+      recentSubtitle: '快速存取最近的短網址',
+      viewAll: '查看全部',
+      clear: '清除',
+      settingsTitle: '設定',
+      languageLabel: '介面語言',
+      languageAuto: '自動（跟隨瀏覽器）',
+      languageEn: 'English',
+      languageZh: '繁體中文',
+      languageHint: '預設跟隨瀏覽器，可在此覆蓋設定。',
+      openSettings: '後端設定',
+      noClosedTabs: '沒有可還原的分頁',
+      closedTabsError: '無法載入已關閉分頁',
+      infoNoClosed: '沒有可還原的分頁',
+      errorRestore: '復原分頁失敗：',
+      restoreTab: '還原',
+      noShortened: '尚未產生短網址',
+      statsVisits: '次點擊',
+      statsVisitors: '訪客',
+      statsReferers: '來源',
+      copy: '複製',
+      copied: '已複製！',
+      shortUrlLabel: '短網址：',
+      enterUrlAlert: '請先輸入網址',
+      confirmDelete: '刪除這筆短網址？',
+      deleteSuccess: '刪除成功',
+      deleteError: '刪除失敗：',
+      timeDaySuffix: '天前',
+      timeHourSuffix: '小時前',
+      timeMinuteSuffix: '分鐘前',
+      timeNow: '剛剛',
+      confirmClearHistory: '確定清除全部歷史紀錄？',
+      configureApi: '請先設定 API 與 Token',
+      editTitle: '編輯這筆短網址',
+      deleteTitle: '刪除這筆短網址',
+      pageLabel: '頁面：',
+      customDefaultComment: '自訂網址',
+      untitledPage: '未命名頁面'
+    }
+  };
+
+  const detectBrowserLanguage = () => {
+    const lang = navigator.language?.toLowerCase() || '';
+    if (lang.includes('zh')) return 'zh-TW';
+    return 'en';
+  };
+
+  const resolveLanguage = (preference) => {
+    if (preference && preference !== 'auto') return preference;
+    return detectBrowserLanguage();
+  };
+
+  const t = (key) => translations[activeLanguage]?.[key] || translations.en[key] || key;
+
   const historyList = document.getElementById('history-list');
   const optionsBtn = document.getElementById('options-btn');
   const shortenCurrentBtn = document.getElementById('shorten-current-btn');
@@ -8,11 +148,98 @@ document.addEventListener('DOMContentLoaded', async () => {
   const customCommentInput = document.getElementById('custom-comment');
   const customSlugInput = document.getElementById('custom-slug');
   const expirationSelect = document.getElementById('expiration-select');
+  const languageSelect = document.getElementById('language-select');
+  const advancedToggle = document.getElementById('advanced-toggle');
+  const advancedFields = document.getElementById('advanced-fields');
   const resultDiv = document.getElementById('result');
   const clearHistoryBtn = document.getElementById('clear-history-btn');
   const viewAllBtn = document.getElementById('view-all-btn');
   const restoreLastTabBtn = document.getElementById('restore-last-tab-btn');
   const closedTabsList = document.getElementById('closed-tabs-list');
+  const generateQrBtn = document.getElementById('generate-qr-btn');
+  const qrContainer = document.getElementById('qr-container');
+  const qrCodeEl = document.getElementById('qr-code');
+  const qrLinkEl = document.getElementById('qr-link');
+  let activeLanguage = 'en';
+  let userLanguagePreference = 'auto';
+  let historyLoadSequence = 0;
+  let isAdvancedOpen = false;
+  let lastShortUrl = '';
+  let qrInstance = null;
+
+  const updateAdvancedToggleLabel = () => {
+    const label = advancedToggle.querySelector('[data-i18n="advancedToggle"]');
+    if (!label) return;
+    label.textContent = isAdvancedOpen ? t('advancedHide') : t('advancedShow');
+  };
+
+  const applyTranslations = () => {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      if (el.dataset.i18n === 'advancedToggle') return;
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.dataset.i18nPlaceholder;
+      const text = t(key);
+      if (text) el.placeholder = text;
+    });
+    document.querySelectorAll('option[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    updateAdvancedToggleLabel();
+  };
+
+  const updateQrButtonState = () => {
+    if (!generateQrBtn) return;
+    const disabled = !lastShortUrl;
+    generateQrBtn.disabled = disabled;
+    generateQrBtn.style.opacity = disabled ? 0.6 : 1;
+  };
+
+  const setLastShortUrl = (url) => {
+    lastShortUrl = url || '';
+    updateQrButtonState();
+    if (!lastShortUrl && qrContainer) {
+      qrContainer.classList.add('hidden');
+    }
+  };
+
+  const renderQr = (url) => {
+    if (!qrContainer || !qrCodeEl || !qrLinkEl) return;
+    if (!url) {
+      alert(t('qrNeedUrl'));
+      return;
+    }
+
+    qrContainer.classList.remove('hidden');
+    qrCodeEl.innerHTML = '';
+    if (qrInstance && typeof qrInstance.clear === 'function') {
+      qrInstance.clear();
+    }
+
+    qrInstance = new QRCode(qrCodeEl, {
+      text: url,
+      width: 180,
+      height: 180,
+      correctLevel: QRCode.CorrectLevel.M,
+      colorDark: '#0f172a',
+      colorLight: '#ffffff'
+    });
+
+    qrLinkEl.textContent = url;
+    qrLinkEl.href = url;
+    qrLinkEl.title = url;
+  };
+
+  updateQrButtonState();
+
+  const initLanguage = async () => {
+    const stored = await chrome.storage.sync.get('languagePreference');
+    userLanguagePreference = stored.languagePreference || 'auto';
+    activeLanguage = resolveLanguage(userLanguagePreference);
+    languageSelect.value = userLanguagePreference;
+    applyTranslations();
+  };
 
   // Format time ago
   const timeAgo = (timestamp) => {
@@ -22,10 +249,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
     
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    if (minutes > 0) return `${minutes}m ago`;
-    return 'Just now';
+    if (days > 0) return `${days}${t('timeDaySuffix')}`;
+    if (hours > 0) return `${hours}${t('timeHourSuffix')}`;
+    if (minutes > 0) return `${minutes}${t('timeMinuteSuffix')}`;
+    return t('timeNow');
   };
 
   // Load recently closed tabs
@@ -62,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             const restoreBtn = document.createElement('button');
             restoreBtn.className = 'restore-btn';
-            restoreBtn.textContent = '↩️ Restore';
+            restoreBtn.textContent = '↩️ ' + t('restoreTab');
             restoreBtn.onclick = async (e) => {
               e.stopPropagation();
               await chrome.sessions.restore(session.tab.sessionId);
@@ -103,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const restoreBtn = document.createElement('button');
             restoreBtn.className = 'restore-btn';
             restoreBtn.style.background = '#2196f3';
-            restoreBtn.textContent = '↩️ Restore';
+            restoreBtn.textContent = '↩️ ' + t('restoreTab');
             restoreBtn.onclick = async (e) => {
               e.stopPropagation();
               await chrome.sessions.restore(session.window.sessionId);
@@ -126,12 +353,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const noTabs = document.createElement('div');
         noTabs.className = 'no-history';
         noTabs.style.padding = '10px';
-        noTabs.textContent = 'No recently closed tabs';
+        noTabs.textContent = t('noClosedTabs');
         closedTabsList.appendChild(noTabs);
       }
     } catch (error) {
       console.error('Error loading closed tabs:', error);
-      closedTabsList.innerHTML = '<div class="no-history" style="padding: 10px;">Unable to load closed tabs</div>';
+      closedTabsList.innerHTML = `<div class="no-history" style="padding: 10px;">${t('closedTabsError')}</div>`;
     }
   };
 
@@ -148,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         await loadClosedTabs();
       } else {
-        resultDiv.innerHTML = '<strong>Info:</strong> No closed tabs to restore';
+        resultDiv.innerHTML = `<strong>${t('infoNoClosed')}</strong>`;
         resultDiv.style.display = 'block';
         setTimeout(() => {
           resultDiv.style.display = 'none';
@@ -156,15 +383,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (error) {
       console.error('Error restoring tab:', error);
-      resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+      resultDiv.innerHTML = `<strong>${t('errorRestore')}</strong> ${error.message}`;
       resultDiv.style.display = 'block';
     }
   });
 
   // Load closed tabs
-  await loadClosedTabs();
-
-  let historyLoadSequence = 0;
+  // moved to post-language init
 
   // Load history
   const loadHistory = async () => {
@@ -179,6 +404,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (history && history.length > 0) {
       const recentHistory = history.slice(0, 10);
+      if (!lastShortUrl) {
+        setLastShortUrl(recentHistory[0].short);
+      }
       
       // Load stats for each URL in parallel
       const historyWithStats = await Promise.all(
@@ -205,7 +433,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const title = document.createElement('div');
         title.className = 'history-title';
-        title.textContent = item.title || 'Untitled Page';
+        title.textContent = item.title || t('untitledPage');
         title.title = item.title || item.original;
         
         // Add stats display
@@ -214,7 +442,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stats.style.fontSize = '11px';
         stats.style.color = '#28a745';
         stats.style.marginBottom = '6px';
-        stats.innerHTML = `📊 ${item.stats.visits} visits • ${item.stats.visitors} visitors • ${item.stats.referers} referers`;
+        stats.innerHTML = `📊 ${item.stats.visits} ${t('statsVisits')} • ${item.stats.visitors} ${t('statsVisitors')} • ${item.stats.referers} ${t('statsReferers')}`;
         
         const links = document.createElement('div');
         links.className = 'history-links';
@@ -226,14 +454,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         shortLink.title = `Original: ${item.original}`;
         
         const copyBtn = document.createElement('button');
-        copyBtn.textContent = 'Copy';
+        copyBtn.textContent = t('copy');
         copyBtn.className = 'copy-btn';
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(item.short);
-          copyBtn.textContent = 'Copied!';
+          copyBtn.textContent = t('copied');
           copyBtn.classList.add('copied');
           setTimeout(() => {
-            copyBtn.textContent = 'Copy';
+            copyBtn.textContent = t('copy');
             copyBtn.classList.remove('copied');
           }, 1500);
         };
@@ -248,7 +476,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const miniEditBtn = document.createElement('button');
         miniEditBtn.className = 'mini-btn';
         miniEditBtn.textContent = '✏️';
-        miniEditBtn.title = 'Edit this URL';
+        miniEditBtn.title = t('editTitle');
         miniEditBtn.onclick = (e) => {
           e.preventDefault();
           // Open history page with edit mode for this item
@@ -259,10 +487,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const miniDeleteBtn = document.createElement('button');
         miniDeleteBtn.className = 'mini-btn delete';
         miniDeleteBtn.textContent = '🗑️';
-        miniDeleteBtn.title = 'Delete this URL';
+        miniDeleteBtn.title = t('deleteTitle');
         miniDeleteBtn.onclick = async (e) => {
           e.preventDefault();
-          if (confirm(`Delete this URL?\n${item.short}`)) {
+          if (confirm(`${t('confirmDelete')}\n${item.short}`)) {
             await deleteUrlFromPopup(item);
           }
         };
@@ -286,12 +514,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const noHistory = document.createElement('li');
       noHistory.className = 'no-history';
-      noHistory.textContent = 'No shortened URLs yet';
+      noHistory.textContent = t('noShortened');
       historyList.appendChild(noHistory);
     }
   };
-
-  await loadHistory();
 
   // Shorten URL function
   const shortenUrl = async (url, title = null, comment = null, slug = null, expiration = null) => {
@@ -338,7 +564,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       history.unshift({ 
         original: url, 
         short: shortLink, 
-        title: title || 'Untitled Page',
+        title: title || t('untitledPage'),
         comment: comment || '',
         slug: slug || '',
         expiration: expiration || '',
@@ -347,8 +573,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (history.length > 50) history.pop(); // Keep last 50 items
       await chrome.storage.sync.set({ history });
 
+      setLastShortUrl(shortLink);
+      if (qrContainer) {
+        qrContainer.classList.add('hidden');
+      }
+
       // Show result
-      resultDiv.innerHTML = `<strong>Short URL:</strong> <a href="${shortLink}" target="_blank">${shortLink}</a>`;
+      resultDiv.innerHTML = `<strong>${t('shortUrlLabel')}</strong> <a href="${shortLink}" target="_blank">${shortLink}</a>`;
       resultDiv.style.display = 'block';
 
       // Copy to clipboard
@@ -366,10 +597,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
+  generateQrBtn.addEventListener('click', () => {
+    if (!lastShortUrl) {
+      alert(t('qrNeedUrl'));
+      return;
+    }
+    renderQr(lastShortUrl);
+  });
+
   // Shorten current page URL
   shortenCurrentBtn.addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const comment = `Page: ${tab.title}`;
+    const comment = `${t('pageLabel')} ${tab.title}`;
     await shortenUrl(tab.url, tab.title, comment);
   });
 
@@ -381,11 +620,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const expiration = expirationSelect.value;
     
     if (!url) {
-      alert('Please enter a URL');
+      alert(t('enterUrlAlert'));
       return;
     }
     
-    await shortenUrl(url, null, comment || 'Custom URL', slug, expiration);
+    await shortenUrl(url, null, comment || t('customDefaultComment'), slug, expiration);
     customUrlInput.value = '';
     customCommentInput.value = '';
     customSlugInput.value = '';
@@ -394,8 +633,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Clear history
   clearHistoryBtn.addEventListener('click', async () => {
-    if (confirm('Are you sure you want to clear all history?')) {
+    if (confirm(t('confirmClearHistory'))) {
       await chrome.storage.sync.set({ history: [] });
+      setLastShortUrl('');
+      if (qrContainer) {
+        qrContainer.classList.add('hidden');
+      }
       await loadHistory();
     }
   });
@@ -416,7 +659,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { baseUrl, token, history } = await chrome.storage.sync.get(['baseUrl', 'token', 'history']);
       
       if (!baseUrl || !token) {
-        alert('Please configure API settings first');
+        alert(t('configureApi'));
         return;
       }
 
@@ -450,15 +693,36 @@ document.addEventListener('DOMContentLoaded', async () => {
       await loadHistory();
       
       // Show success message
-      resultDiv.innerHTML = '<strong>Success:</strong> URL deleted successfully';
+      resultDiv.innerHTML = `<strong>${t('deleteSuccess')}</strong>`;
       resultDiv.style.display = 'block';
       setTimeout(() => {
         resultDiv.style.display = 'none';
       }, 3000);
     } catch (error) {
       console.error('Failed to delete URL:', error);
-      resultDiv.innerHTML = `<strong>Error:</strong> Failed to delete URL: ${error.message}`;
+      resultDiv.innerHTML = `<strong>${t('deleteError')}</strong> ${error.message}`;
       resultDiv.style.display = 'block';
     }
   };
+
+  // Advanced fields toggle
+  advancedToggle.addEventListener('click', () => {
+    isAdvancedOpen = !isAdvancedOpen;
+    advancedFields.classList.toggle('open', isAdvancedOpen);
+    updateAdvancedToggleLabel();
+  });
+
+  // Language select
+  languageSelect.addEventListener('change', async () => {
+    userLanguagePreference = languageSelect.value;
+    await chrome.storage.sync.set({ languagePreference: userLanguagePreference });
+    activeLanguage = resolveLanguage(userLanguagePreference);
+    applyTranslations();
+    await loadClosedTabs();
+    await loadHistory();
+  });
+
+  await initLanguage();
+  await loadClosedTabs();
+  await loadHistory();
 });
