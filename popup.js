@@ -61,7 +61,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       deleteTitle: 'Delete this URL',
       pageLabel: 'Page:',
       customDefaultComment: 'Custom URL',
-      untitledPage: 'Untitled Page'
+      untitledPage: 'Untitled Page',
+      downloadQr: 'Download QR Code',
+      shortening: 'Shortening...',
+      popupTitle: 'Short URL & Restore',
+      showMore: 'Show More (+)'
     },
     'zh-TW': {
       recentTabs: '復原關閉頁籤',
@@ -123,7 +127,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       deleteTitle: '刪除這筆短網址',
       pageLabel: '頁面：',
       customDefaultComment: '自訂網址',
-      untitledPage: '未命名頁面'
+      untitledPage: '未命名頁面',
+      downloadQr: '下載 QR Code',
+      shortening: '縮短中...',
+      popupTitle: '縮網址與還原分頁',
+      showMore: '顯示更多分頁 (+)'
     }
   };
 
@@ -166,6 +174,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isAdvancedOpen = false;
   let lastShortUrl = '';
   let qrInstance = null;
+
+  // Theme Management
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  
+  const sunSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-emphasis);"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+  const moonSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-emphasis);"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+  const applyTheme = (theme) => {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      if (themeToggleBtn) themeToggleBtn.innerHTML = sunSvg;
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      if (themeToggleBtn) themeToggleBtn.innerHTML = moonSvg;
+    }
+  };
+
+  const initTheme = async () => {
+    const stored = await chrome.storage.sync.get('themePreference');
+    const activeTheme = stored.themePreference || 'light';
+    applyTheme(activeTheme);
+  };
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', async () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme);
+      await chrome.storage.sync.set({ themePreference: newTheme });
+    });
+  }
+
+  await initTheme();
 
   const updateAdvancedToggleLabel = () => {
     const label = advancedToggle.querySelector('[data-i18n="advancedToggle"]');
@@ -255,110 +296,175 @@ document.addEventListener('DOMContentLoaded', async () => {
     return t('timeNow');
   };
 
+  let closedTabsMaxResults = 5;
+  let sessionsCache = [];
+
   // Load recently closed tabs
   const loadClosedTabs = async () => {
     try {
-      const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 10 });
-      closedTabsList.innerHTML = '';
-      
-      if (sessions && sessions.length > 0) {
-        sessions.forEach((session, index) => {
-          if (session.tab) {
-            const item = document.createElement('div');
-            item.className = 'closed-tab-item';
-            
-            const info = document.createElement('div');
-            info.className = 'closed-tab-info';
-            
-            const title = document.createElement('div');
-            title.className = 'closed-tab-title';
-            title.textContent = session.tab.title || 'Untitled';
-            title.title = session.tab.title;
-            
-            const url = document.createElement('div');
-            url.className = 'closed-tab-url';
-            url.textContent = session.tab.url;
-            url.title = session.tab.url;
-            
-            info.appendChild(title);
-            info.appendChild(url);
-            
-            const time = document.createElement('div');
-            time.className = 'closed-tab-time';
-            time.textContent = timeAgo(session.lastModified * 1000);
-            
-            const restoreBtn = document.createElement('button');
-            restoreBtn.className = 'restore-btn';
-            restoreBtn.textContent = '↩️ ' + t('restoreTab');
-            restoreBtn.onclick = async (e) => {
-              e.stopPropagation();
-              await chrome.sessions.restore(session.tab.sessionId);
-              await loadClosedTabs();
-            };
-            
-            // Click on item to restore
-            item.onclick = async () => {
-              await chrome.sessions.restore(session.tab.sessionId);
-              await loadClosedTabs();
-            };
-            
-            item.appendChild(info);
-            item.appendChild(time);
-            item.appendChild(restoreBtn);
-            
-            closedTabsList.appendChild(item);
-          } else if (session.window) {
-            // Handle closed windows
-            const item = document.createElement('div');
-            item.className = 'closed-tab-item';
-            item.style.background = '#e3f2fd';
-            item.style.borderColor = '#2196f3';
-            
-            const info = document.createElement('div');
-            info.className = 'closed-tab-info';
-            
-            const title = document.createElement('div');
-            title.className = 'closed-tab-title';
-            title.textContent = `🪟 Window with ${session.window.tabs.length} tabs`;
-            
-            info.appendChild(title);
-            
-            const time = document.createElement('div');
-            time.className = 'closed-tab-time';
-            time.textContent = timeAgo(session.lastModified * 1000);
-            
-            const restoreBtn = document.createElement('button');
-            restoreBtn.className = 'restore-btn';
-            restoreBtn.style.background = '#2196f3';
-            restoreBtn.textContent = '↩️ ' + t('restoreTab');
-            restoreBtn.onclick = async (e) => {
-              e.stopPropagation();
-              await chrome.sessions.restore(session.window.sessionId);
-              await loadClosedTabs();
-            };
-            
-            item.onclick = async () => {
-              await chrome.sessions.restore(session.window.sessionId);
-              await loadClosedTabs();
-            };
-            
-            item.appendChild(info);
-            item.appendChild(time);
-            item.appendChild(restoreBtn);
-            
-            closedTabsList.appendChild(item);
-          }
-        });
-      } else {
-        const noTabs = document.createElement('div');
-        noTabs.className = 'no-history';
-        noTabs.style.padding = '10px';
-        noTabs.textContent = t('noClosedTabs');
-        closedTabsList.appendChild(noTabs);
-      }
+      sessionsCache = await chrome.sessions.getRecentlyClosed({ maxResults: 25 });
+      renderClosedTabs();
     } catch (error) {
       console.error('Error loading closed tabs:', error);
       closedTabsList.innerHTML = `<div class="no-history" style="padding: 10px;">${t('closedTabsError')}</div>`;
+    }
+  };
+
+  const renderClosedTabs = () => {
+    closedTabsList.innerHTML = '';
+    
+    if (sessionsCache && sessionsCache.length > 0) {
+      const visibleSessions = sessionsCache.slice(0, closedTabsMaxResults);
+      
+      visibleSessions.forEach((session) => {
+        if (session.tab) {
+          const item = document.createElement('div');
+          item.className = 'closed-tab-item';
+          
+          // Tab favicon support
+          const favicon = document.createElement('img');
+          favicon.className = 'closed-tab-favicon';
+          favicon.style.width = '16px';
+          favicon.style.height = '16px';
+          favicon.style.borderRadius = '4px';
+          favicon.style.flexShrink = '0';
+          
+          if (session.tab.favIconUrl && (session.tab.favIconUrl.startsWith('http') || session.tab.favIconUrl.startsWith('data:'))) {
+            favicon.src = session.tab.favIconUrl;
+          } else {
+            try {
+              const domain = new URL(session.tab.url).hostname;
+              favicon.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            } catch (e) {
+              favicon.src = 'icons/icon16.png';
+            }
+          }
+          
+          favicon.onerror = () => {
+            favicon.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%236b7280" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0M7.5 1.018a7 7 0 0 1-.83 2.118A7 7 0 0 0 5.074 1.488zm1 0 .256.256c.386.72.964 1.324 1.634 1.748L8.5 3.048zm-1 3.03a6 6 0 0 1 .83-2.118l-.256-.256a7 7 0 0 0-1.634 1.748zM5.074 1.488a7 7 0 0 0-1.634 1.748l.366.366h1.268zm3.016-1.37H12.5v-2.012c-.116.003-.23.014-.34.03l-.22 2.012z"/></svg>';
+          };
+          
+          const info = document.createElement('div');
+          info.className = 'closed-tab-info';
+          
+          const title = document.createElement('div');
+          title.className = 'closed-tab-title';
+          title.textContent = session.tab.title || 'Untitled';
+          title.title = session.tab.title;
+          
+          const url = document.createElement('div');
+          url.className = 'closed-tab-url';
+          url.textContent = session.tab.url;
+          url.title = session.tab.url;
+          
+          info.appendChild(title);
+          info.appendChild(url);
+          
+          const time = document.createElement('div');
+          time.className = 'closed-tab-time';
+          time.textContent = timeAgo(session.lastModified * 1000);
+          
+          const restoreBtn = document.createElement('button');
+          restoreBtn.className = 'restore-btn';
+          restoreBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>${t('restoreTab')}`;
+          restoreBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await chrome.sessions.restore(session.tab.sessionId);
+            await loadClosedTabs();
+          };
+          
+          // Click on item to restore
+          item.onclick = async () => {
+            await chrome.sessions.restore(session.tab.sessionId);
+            await loadClosedTabs();
+          };
+          
+          item.appendChild(favicon);
+          item.appendChild(info);
+          item.appendChild(time);
+          item.appendChild(restoreBtn);
+          
+          closedTabsList.appendChild(item);
+        } else if (session.window) {
+          // Handle closed windows
+          const item = document.createElement('div');
+          item.className = 'closed-tab-item';
+          
+          const favicon = document.createElement('span');
+          favicon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #2196f3; vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`;
+          favicon.style.display = 'inline-flex';
+          favicon.style.alignItems = 'center';
+          favicon.style.flexShrink = '0';
+          
+          const info = document.createElement('div');
+          info.className = 'closed-tab-info';
+          
+          const title = document.createElement('div');
+          title.className = 'closed-tab-title';
+          title.textContent = `Window with ${session.window.tabs.length} tabs`;
+          
+          info.appendChild(title);
+          
+          const time = document.createElement('div');
+          time.className = 'closed-tab-time';
+          time.textContent = timeAgo(session.lastModified * 1000);
+          
+          const restoreBtn = document.createElement('button');
+          restoreBtn.className = 'restore-btn';
+          restoreBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>${t('restoreTab')}`;
+          restoreBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await chrome.sessions.restore(session.window.sessionId);
+            await loadClosedTabs();
+          };
+          
+          item.onclick = async () => {
+            await chrome.sessions.restore(session.window.sessionId);
+            await loadClosedTabs();
+          };
+          
+          item.appendChild(favicon);
+          item.appendChild(info);
+          item.appendChild(time);
+          item.appendChild(restoreBtn);
+          
+          closedTabsList.appendChild(item);
+        }
+      });
+
+      // Append Show More button if there are more sessions
+      if (sessionsCache.length > closedTabsMaxResults) {
+        const showMoreDiv = document.createElement('div');
+        showMoreDiv.style.textAlign = 'center';
+        showMoreDiv.style.marginTop = '6px';
+        
+        const showMoreBtn = document.createElement('button');
+        showMoreBtn.className = 'button secondary';
+        showMoreBtn.style.width = 'auto';
+        showMoreBtn.style.padding = '4px 10px';
+        showMoreBtn.style.fontSize = '11px';
+        showMoreBtn.style.borderRadius = '6px';
+        showMoreBtn.style.cursor = 'pointer';
+        showMoreBtn.style.display = 'inline-flex';
+        showMoreBtn.style.alignItems = 'center';
+        showMoreBtn.style.gap = '4px';
+        showMoreBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> ${t('showMore')}`;
+        
+        showMoreBtn.onclick = (e) => {
+          e.preventDefault();
+          closedTabsMaxResults += 5;
+          renderClosedTabs();
+        };
+        
+        showMoreDiv.appendChild(showMoreBtn);
+        closedTabsList.appendChild(showMoreDiv);
+      }
+    } else {
+      const noTabs = document.createElement('div');
+      noTabs.className = 'no-history';
+      noTabs.style.padding = '10px';
+      noTabs.textContent = t('noClosedTabs');
+      closedTabsList.appendChild(noTabs);
     }
   };
 
@@ -436,13 +542,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         title.textContent = item.title || t('untitledPage');
         title.title = item.title || item.original;
         
-        // Add stats display
-        const stats = document.createElement('div');
-        stats.className = 'history-stats';
-        stats.style.fontSize = '11px';
-        stats.style.color = '#28a745';
-        stats.style.marginBottom = '6px';
-        stats.innerHTML = `📊 ${item.stats.visits} ${t('statsVisits')} • ${item.stats.visitors} ${t('statsVisitors')} • ${item.stats.referers} ${t('statsReferers')}`;
+        stats.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; color: var(--green-dark);"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>${item.stats.visits} ${t('statsVisits')} • ${item.stats.visitors} ${t('statsVisitors')} • ${item.stats.referers} ${t('statsReferers')}`;
         
         const links = document.createElement('div');
         links.className = 'history-links';
@@ -475,7 +575,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const miniEditBtn = document.createElement('button');
         miniEditBtn.className = 'mini-btn';
-        miniEditBtn.textContent = '✏️';
+        miniEditBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`;
         miniEditBtn.title = t('editTitle');
         miniEditBtn.onclick = (e) => {
           e.preventDefault();
@@ -486,7 +586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const miniDeleteBtn = document.createElement('button');
         miniDeleteBtn.className = 'mini-btn delete';
-        miniDeleteBtn.textContent = '🗑️';
+        miniDeleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
         miniDeleteBtn.title = t('deleteTitle');
         miniDeleteBtn.onclick = async (e) => {
           e.preventDefault();
@@ -521,42 +621,71 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Shorten URL function
   const shortenUrl = async (url, title = null, comment = null, slug = null, expiration = null) => {
+    // Disable shorten buttons and show loading state
+    const originalCurrentText = shortenCurrentBtn.innerHTML;
+    const originalCustomText = shortenCustomBtn.innerHTML;
+    shortenCurrentBtn.disabled = true;
+    shortenCustomBtn.disabled = true;
+    shortenCurrentBtn.style.opacity = '0.6';
+    shortenCustomBtn.style.opacity = '0.6';
+    shortenCurrentBtn.innerHTML = `⏳ ${t('shortening')}`;
+    shortenCustomBtn.innerHTML = `⏳ ${t('shortening')}`;
+
     try {
       // Get settings
-      const { baseUrl, token } = await chrome.storage.sync.get(['baseUrl', 'token']);
+      const { baseUrl, token, backupUrl, backupToken } = await chrome.storage.sync.get(['baseUrl', 'token', 'backupUrl', 'backupToken']);
       
-      // Prepare request body
-      const requestBody = { url };
-      if (comment) {
-        requestBody.comment = comment;
-      }
-      if (slug) {
-        requestBody.slug = slug;
-      }
-      if (expiration) {
-        requestBody.expiration = expiration;
-      }
-      
-      const response = await fetch(baseUrl, {
-        method: 'POST',
-        headers: {
-          'authorization': `Bearer ${token}`,
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
+      const tryShorten = async (apiUrl, apiToken) => {
+        // Auto-prepend protocol if missing
+        let targetUrl = url;
+        if (!/^https?:\/\//i.test(targetUrl)) {
+          targetUrl = 'https://' + targetUrl;
+        }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+        // Prepare request body
+        const requestBody = { url: targetUrl };
+        if (comment) requestBody.comment = comment;
+        if (slug) requestBody.slug = slug;
+        if (expiration) requestBody.expiration = expiration;
 
-      const data = await response.json();
-      if (!data.link || !data.link.slug) {
-        throw new Error('Invalid response: no link or slug field');
-      }
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'authorization': `Bearer ${apiToken}`,
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        });
 
-      const base = baseUrl.replace('/api/link/create', '');
-      const shortLink = base + '/' + data.link.slug;
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.link || !data.link.slug) {
+          throw new Error('Invalid response: no link or slug field');
+        }
+
+        const base = apiUrl.replace('/api/link/create', '');
+        return base + '/' + data.link.slug;
+      };
+
+      let shortLink;
+      try {
+        shortLink = await tryShorten(baseUrl, token);
+      } catch (primaryError) {
+        console.warn('Primary shortening failed, trying backup API if configured...', primaryError);
+        if (backupUrl && backupToken) {
+          try {
+            shortLink = await tryShorten(backupUrl, backupToken);
+          } catch (backupError) {
+            console.error('Backup shortening also failed:', backupError);
+            throw new Error(`Primary API failed (${primaryError.message}) & Backup API also failed (${backupError.message})`);
+          }
+        } else {
+          throw primaryError;
+        }
+      }
 
       // Store history with title, comment and timestamp
       const result = await chrome.storage.sync.get('history');
@@ -594,6 +723,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
       resultDiv.style.display = 'block';
       throw error;
+    } finally {
+      // Restore button states
+      shortenCurrentBtn.disabled = false;
+      shortenCustomBtn.disabled = false;
+      shortenCurrentBtn.style.opacity = '1';
+      shortenCustomBtn.style.opacity = '1';
+      shortenCurrentBtn.innerHTML = originalCurrentText;
+      shortenCustomBtn.innerHTML = originalCustomText;
     }
   };
 
@@ -604,6 +741,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     renderQr(lastShortUrl);
   });
+
+  // Download QR Code Click Event
+  const downloadQrBtn = document.getElementById('download-qr-btn');
+  if (downloadQrBtn) {
+    downloadQrBtn.addEventListener('click', () => {
+      const img = qrCodeEl.querySelector('img');
+      const canvas = qrCodeEl.querySelector('canvas');
+      
+      let dataUrl = '';
+      if (img && img.src) {
+        dataUrl = img.src;
+      } else if (canvas) {
+        dataUrl = canvas.toDataURL('image/png');
+      }
+      
+      if (dataUrl) {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `qrcode-${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        alert(t('qrNeedUrl'));
+      }
+    });
+  }
 
   // Shorten current page URL
   shortenCurrentBtn.addEventListener('click', async () => {
@@ -630,6 +794,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     customSlugInput.value = '';
     expirationSelect.value = '';
   });
+
+  // Keyboard shortcut: Press Enter inside custom URL input to shorten
+  if (customUrlInput) {
+    customUrlInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        shortenCustomBtn.click();
+      }
+    });
+  }
 
   // Clear history
   clearHistoryBtn.addEventListener('click', async () => {

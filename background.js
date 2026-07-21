@@ -70,16 +70,24 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
     try {
       const comment = `Right-click: ${tab.title}`;
-      let data = await tryShorten(url, apiUrl, auth, comment);
-      let shortLink = data.shortLink;
+      let data;
+      let shortLink;
 
-      // If backup URL is set and primary failed, try backup
-      if (!shortLink && backupUrl && backupToken) {
-        try {
-          data = await tryShorten(url, backupUrl, `Bearer ${backupToken}`, comment);
-          shortLink = data.shortLink;
-        } catch (backupError) {
-          console.error('Backup also failed:', backupError);
+      try {
+        data = await tryShorten(url, apiUrl, auth, comment);
+        shortLink = data.shortLink;
+      } catch (primaryError) {
+        console.warn('Primary shortening failed, trying backup API...', primaryError);
+        if (backupUrl && backupToken) {
+          try {
+            data = await tryShorten(url, backupUrl, `Bearer ${backupToken}`, comment);
+            shortLink = data.shortLink;
+          } catch (backupError) {
+            console.error('Backup also failed:', backupError);
+            throw new Error(`Primary API failed (${primaryError.message}) & Backup API also failed (${backupError.message})`);
+          }
+        } else {
+          throw primaryError;
         }
       }
 
