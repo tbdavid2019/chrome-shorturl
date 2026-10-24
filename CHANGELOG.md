@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.3.0] - 2026-10-24
+
+### Added (新增 / 核心功能升級)
+- **頂部雙分頁導航架構 (Segmented Tab Navigation)**:
+  - 將「還原分頁 (Restore Tabs)」與「縮短網址 (Short URL)」重構為頂部流暢切換的雙面板架構，預設首頁聚焦於高頻使用的還原分頁，並自動記憶使用者上次停留的頁籤。
+  - 還原分頁獲得完整垂直視窗空間（支援捲動與多筆檢視），徹底解決過往空間狹窄擠壓的問題。
+- **關閉分頁即時搜尋與過濾 (Instant Tab Search & Filter)**:
+  - 於還原面板新增即時搜尋框，輸入關鍵字即可即刻過濾關閉分頁的標題與網址，秒速尋回重要頁面。
+- **英雄級快捷還原大按鈕 (Hero Restore Button)**:
+  - 醒目 Saffron 金黃高對比按鈕，支援一鍵還原最後關閉的分頁，並自動偵測系統環境標註快速鍵提示（Mac `⌘+Shift+T` / Windows `Ctrl+Shift+T`），在彈窗內按 Enter 亦可快速觸發。
+- **批次還原與重新整理 (Restore All & Refresh)**:
+  - 支援「全部還原」一鍵復原清單中所有關閉分頁，以及「重新整理」即時重繪 Chrome sessions。
+- **整組視窗關閉折疊預覽 (Window Session Collapse & Preview)**:
+  - 智慧識別整組視窗關閉紀錄（例如視窗含 6 個分頁），支援展開預覽內部各分頁標題，亦可一鍵整組視窗復原。
+
+### Changed (變更 / 設計系統重構)
+- **品牌視覺全面對標 david888.com & 2md.aiurl.tw (Design System Alignment)**:
+  - 引入核心五色品牌調色盤：Saffron 藏紅花黃 (`#ffb010`, Pantone 14-1064 TPG)、Deep Blue 深海藍 (`#17324d`)、Clay 陶土紅 (`#a9471d`)、Warm Cream 暖米白 (`#fff9e8`)、Ink 墨黑 (`#2b251a`) 與 Canvas 溫潤畫布底色 (`#fff0cc`)。
+  - 重構淺色模式與深色模式（Dark Mode 對標 david888.com 暗夜藍系 `--bg-base: #0c1927`、`--bg-surface: #13273c`、`--bg-surface-elevated: #1b3450`）。
+  - 統一 Popup、Options 與 History 三大核心頁面的主題變數、卡片層級與邊框質感，徹底移除舊有雜亂拼湊的冷綠/淡紫/冷灰配色。
+
+- **WCAG 2.1 AA / AAA 無障礙色彩合規 (Accessibility Compliance)**:
+  - 修正黃色背景按鈕使用白字導致嚴重不可讀的嚴重瑕疵：在 Saffron 主色背景 (`#ffb010`) 上全面採用 Ink 墨黑色 (`#2b251a`) 文字與圖示，對比度達到 **8.33:1**，超額通過 **WCAG AAA** 最高對比標準（≥ 7:1）。
+  - 次要與功能按鈕採用 Deep Blue (`#17324d`) 搭配白字，對比度達 **12.65:1**（WCAG AAA）。
+  - 危險/清除按鈕採用 Clay 陶土紅 (`#a9471d`) 搭配白字，對比度達 **5.96:1**（WCAG AA）。
+  - 次要輔助文字在淺色模式採用深暖褐灰 (`#594e36`)，對比度 **6.2:1**（WCAG AA）；在深色模式採用淡冷灰 (`#cbd5e1`)，對比度 **9.1:1**（WCAG AAA）。
+  - 優化表單輸入框焦點態光環 (`focus-ring: rgba(255, 176, 16, 0.45)`)，大幅提升鍵盤導航可見度。
+
+- **嚴格規範字體階梯，根除字體忽大忽小 (Typography Standardization)**:
+  - 引入 `Noto Sans TC` 與等寬字型 `JetBrains Mono` 跨平台字型族群，提升中文與短網址/代碼的可讀性。
+  - 徹底清除所有零散、碎小的字級（刪除 10px、11px、11.5px、12.5px、13.5px 等破碎小數點尺寸）。
+  - 確立統一的 5 級階梯標準：
+    - 主標題 (Page Header): `22px` (Bold)
+    - 次標題 (Card / Modal Header): `15px` ~ `16px` (Semi-bold / Bold)
+    - 內文與主要控制項 (Body / Inputs / Buttons): `14px` (Regular / Medium / Semi-bold)
+    - 次要文字與列表副標 (Secondary / Form Labels): `13px` (Medium)
+    - 輔助說明與時間戳記 (Captions / Badges / Timestamps): `12px` (最小合法字級，保護視力且符合易讀性下限)
+  - 短網址顯示區、複製結果與代碼輸入框強制採用等寬字型 (`JetBrains Mono`)，確保短鏈長度與符號清晰整齊不跳動。
+
+---
+
 ## [2.2.0] - 2026-07-21
 
 ### Fixed (修復)

@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (item.stats) {
         const statsDiv = document.createElement('div');
         statsDiv.className = 'history-stats';
-        statsDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; color: var(--green-dark);"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>${item.stats.visits} ${t('statsVisits')} • ${item.stats.visitors} ${t('statsVisitors')} • ${item.stats.referers} ${t('statsReferers')}`;
+        statsDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px; color: currentColor;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>${item.stats.visits} ${t('statsVisits')} • ${item.stats.visitors} ${t('statsVisitors')} • ${item.stats.referers} ${t('statsReferers')}`;
         historyItem.appendChild(statsDiv);
       }
       
@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         totalCount.textContent = `${allHistory.length}${t('urlsCountSuffix')}`;
         storageInfo.textContent = await getStorageInfo();
         
-        showToast(t('refreshNoApi'), '#15a34a');
+        showToast(t('refreshNoApi'), 'var(--secondary)');
         return;
       }
 
@@ -548,11 +548,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       totalCount.textContent = `${allHistory.length}${t('urlsCountSuffix')}`;
       storageInfo.textContent = await getStorageInfo();
       
-      showToast(`✅ ${allHistory.length} ${t('refreshSuccess')}`, '#15a34a');
+      showToast(`✅ ${allHistory.length} ${t('refreshSuccess')}`, 'var(--secondary)');
       
     } catch (error) {
       console.error('Failed to refresh:', error);
-      showToast(`❌ ${t('refreshFailed')}: ${error.message}`, '#ef4444');
+      showToast(`❌ ${t('refreshFailed')}: ${error.message}`, 'var(--danger)');
     } finally {
       refreshStatsBtn.textContent = t('refreshBtn');
       refreshStatsBtn.disabled = false;
@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Toast notification helper
   const showToast = (message, bgColor) => {
     const toast = document.createElement('div');
-    toast.style.cssText = `position: fixed; top: 24px; right: 24px; background: ${bgColor}; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 13.5px; font-weight: 600; font-family: var(--font); animation: slideIn 0.3s ease;`;
+    toast.style.cssText = `position: fixed; top: 24px; right: 24px; background: ${bgColor}; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 600; font-family: var(--font); animation: slideIn 0.3s ease;`;
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => {
